@@ -10,11 +10,14 @@ class K8 {
       bootstrap.modules.forEach(x => fetchList.push(`${K8.MOD_PATH}/${x}/classes/${path}.js`));
       fetchList.push(`${K8.SYS_PATH}/classes/${path}.js`);
 
-      fetchList.forEach(x => {
+
+      for(let i=0; i<fetchList.length; i++){
+        const x = fetchList[i];
         if(fs.existsSync(x)){
           K8.classPath[path] = x;
+          break;
         }
-      });
+      }
 
       if(!K8.classPath[path]){
         console.log(`path ${path} not found`);

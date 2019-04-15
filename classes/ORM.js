@@ -1,5 +1,7 @@
 const Database  = require('better-sqlite3');
-const Model = require('./Model');
+
+const K8 = require('../K8');
+const Model = K8.require('Model');
 
 class ORM extends Model{
   constructor(){
