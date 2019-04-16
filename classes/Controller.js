@@ -1,7 +1,7 @@
 const {Request, Reply} = require('fastify');
 const K8 = require('../K8');
 
-const ORM = K8.require('ORM');
+const ORM = K8.require('./ORM');
 
 class Controller{
   /**
@@ -18,14 +18,39 @@ class Controller{
     this.instance = null;
     this.output = '';
     this.model = ORM;
-    this.response.type('text/html; charset=utf-8');
+
+    this.view = null;
+
+    this.format = this.request.params.format || 'html';
+
+    switch(this.format){
+      case 'json':
+        this.response.type('text/json; charset=utf-8');
+        break;
+      case 'png':
+        this.response.type('image/png');
+        break;
+      case 'jpg':
+      case 'jpeg':
+        this.response.type('image/jpeg');
+        break;
+      default:
+        this.response.type('text/html; charset=utf-8');
+    }
   }
 
   before(){}
 
-  after(){}
+  async after(){
+    try{
+      if(this.view) this.output = await this.view.render();
+    }catch(err){
+      this.response.code(500);
+      this.output = `500 / ${ err.message }`;
+    }
+  }
 
-  execute(){
+  async execute(){
     //guard check function action_* exist
     const action = `action_${this.request.params.action || 'index'}`;
 
@@ -38,13 +63,13 @@ class Controller{
     this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
 
     this[action]();
-    this.after();
+    await this.after();
 
     return this.response;
   }
 
   not_found(msg){
-    this.response.code(404).type('text/html');
+    this.response.code(404);
     this.output = `404 / ${ msg }`;
   }
 
