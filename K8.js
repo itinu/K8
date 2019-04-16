@@ -5,7 +5,7 @@ const EXE_PATH = fs.realpathSync('./');
 const APP_PATH = EXE_PATH + '/application';
 const MOD_PATH = EXE_PATH + '/modules';
 
-const bootstrap = require(`${K8.APP_PATH}/bootstrap.js`);
+const bootstrap = require(`${APP_PATH}/bootstrap.js`);
 
 const resolve = (path, prefix, store)=>{
   if(!store[path]){
