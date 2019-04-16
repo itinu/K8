@@ -2,5 +2,5 @@
 delete require.cache[require.resolve('./RequireCache')];
 
 module.exports = {
-  clearCache : false
+  cache : true
 };

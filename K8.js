@@ -24,8 +24,7 @@ const resolve = (path, prefix, store)=>{
     }
 
     if(!store[path]){
-      console.log(`path ${path} not found`);
-      return null;
+      throw new Error(`path ${path} not found`);
     }
   }
 
@@ -33,11 +32,11 @@ const resolve = (path, prefix, store)=>{
 };
 
 class K8 {
-  static checkConfigClearRequireCache(){
+  static checkConfigClearRequireCache(file){
     const config = require(`${K8.APP_PATH}/config/RequireCache`);
-    K8.clearCache = config.clearCache;
+    K8.cache = config.cache;
 
-    if(K8.clearCache && (file.indexOf(K8.SYS_PATH) !== 0)){
+    if(!K8.cache && (file.indexOf(K8.SYS_PATH) !== 0)){
       delete require.cache[file];
     }
   }
@@ -46,7 +45,7 @@ class K8 {
     const file = resolve(path+'.js', 'classes', K8.classPath);
     const OBJ = require(file);
 
-    K8.checkConfigClearRequireCache();
+    K8.checkConfigClearRequireCache(file);
 
     return OBJ;
   }
@@ -56,7 +55,7 @@ class K8 {
   }
 }
 
-K8.clearCache = false;
+K8.cache = true;
 K8.classPath = [];
 K8.viewPath = [];
 
