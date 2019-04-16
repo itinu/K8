@@ -33,7 +33,7 @@ const resolve = (path, prefix, store)=>{
 
 class K8 {
   static checkConfigClearRequireCache(file){
-    const config = require(`${K8.APP_PATH}/config/RequireCache`);
+    const config = require(resolve('site.js', 'config', K8.configPath));
     K8.cache = config.cache;
 
     if(!K8.cache && (file.indexOf(K8.SYS_PATH) !== 0)){
@@ -58,6 +58,7 @@ class K8 {
 K8.cache = true;
 K8.classPath = [];
 K8.viewPath = [];
+K8.configPath = [];
 
 K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;

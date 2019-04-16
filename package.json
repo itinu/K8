@@ -1,6 +1,6 @@
 {
   "name": "k8mvc",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Node.js MVC file structure base on Kohana Framework",
   "main": "K8.js",
   "scripts": {

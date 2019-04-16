@@ -13,11 +13,22 @@ class View{
     this.file = file;
     this.data = data;
 
-    this.realPath = K8.resolveView(file);
+    this.realPath = K8.resolveView(this.file);
   }
 
   async render(){
     return '';
+  }
+
+  collectProps(){
+    if(this.data)return this.data.concat(View.globalData);
+
+    const props = {};
+    Object.keys(this).forEach(x => {
+      props[x] = this[x];
+    });
+
+    return props.concat(View.globalData);
   }
 }
 
