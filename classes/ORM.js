@@ -17,9 +17,13 @@ class ORM extends Model{
    * @returns {Model}
    */
   belongsTo(model){
-    const fk = new model().constructor.name.toLowerCase() + '_id';
+    const fk = (model.name || new model().constructor.name).toLowerCase() + '_id';
     if(!this[fk])return null;
-    return new model().parse(ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)} WHERE id = ${this[fk]}`).get());
+
+    return Object.assign(
+      new model(),
+      ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)} WHERE id = ${this[fk]}`).get()
+    );
   }
 
   /**
@@ -28,22 +32,26 @@ class ORM extends Model{
    */
   hasOne(model){
     if(this.id == null)return null;
-    return new model().parse(ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)} WHERE ${this.fk} = ${this.id}`).get());
+    return Object.assign(
+      new model(),
+      ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)} WHERE ${this.fk} = ${this.id}`).get()
+    );
   }
 
   hasManyThrough(model, through){
     if(this.id == null )return null;
     ORM.prepare(`SELECT * from ${through} WHERE ${this.fk} = ${this.id}`);
     //TODO
-    return new model().parse();
+    return Object.assign(new model(), {});
   }
 
   static all(model) {
-    return ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)}`).all().map(x => new model().parse(x));
+    return ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)}`).all().map(x => Object.assign(new model(), x));
   }
 
   static get(model, id){
-    return new model().parse(
+    return Object.assign(
+      new model(),
       ORM.prepare(`SELECT * from ${ORM.getTableNameBy(model)} WHERE id = ${id}`).get()
     );
   }
@@ -64,5 +72,8 @@ class ORM extends Model{
     return model.tableName || (new model().constructor.name.toLowerCase() + 's');
   }
 }
+
+ORM.name = 'ORM';
+ORM.tableName = 'orms';
 
 module.exports = ORM;

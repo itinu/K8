@@ -24,7 +24,7 @@ const resolve = (path, prefix, store)=>{
     }
 
     if(!store[path]){
-      throw new Error(`path ${path} not found`);
+      throw new Error(`K8 resolve path error: path ${path} not found`);
     }
   }
 
@@ -64,5 +64,6 @@ K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
+K8.VERSION  = '0.0.11';
 
 module.exports = K8;

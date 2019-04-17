@@ -8,8 +8,6 @@ class Controller{
    * @param {Reply} response
    */
   constructor(request, response){
-    this.showDefaultText = true;
-
     this.request = request;
     this.response = response;
     this.instances = [];
@@ -73,18 +71,10 @@ class Controller{
 
   action_index(){
     this.instances = ORM.all(this.model);
-
-    if(this.showDefaultText){
-      this.instances.forEach(x => (this.output += `<li>${x.name || x.handle || x.id}</li>\n`))
-    }
   }
 
   action_read(){
     this.instance = ORM.get(this.model, this.request.params.id);
-
-    if(this.showDefaultText){
-      this.output += `read ${this.instance.constructor.name} (${this.instance.id}) created at ${this.instance.created_at}`;
-    }
   }
 }
 
