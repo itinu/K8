@@ -21,17 +21,17 @@ class View{
   }
 
   collectProps(){
-    if(this.data)return this.data.concat(View.globalData);
+    if(this.data)return Object.assign({}, View.globalData, this.data);
 
     const props = {};
     Object.keys(this).forEach(x => {
       props[x] = this[x];
     });
 
-    return props.concat(View.globalData);
+    return Object.assign({}, View.globalData, props);
   }
 }
 
-View.globalData = [];
+View.globalData = {};
 
 module.exports = View;

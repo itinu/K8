@@ -2,5 +2,9 @@
 delete require.cache[require.resolve('./site')];
 
 module.exports = {
-  cache : true
+  cache : {
+    exports  : true,
+    database : true,
+    view     : true
+  }
 };
