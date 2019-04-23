@@ -35,7 +35,9 @@ class Controller{
     }
   }
 
-  before(){}
+  async before(){
+
+  }
 
   async after(){
     try{
@@ -55,7 +57,7 @@ class Controller{
       return this.response;
     }
 
-    this.before();
+    await this.before();
     this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
 
     this[action]();
