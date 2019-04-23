@@ -1,6 +1,8 @@
 class Model{
   constructor(){}
 }
-Model.name = 'Model';
+
+Model.lowercase = 'model';
+Model.fields = [];
 
 module.exports = Model;
