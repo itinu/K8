@@ -6,5 +6,6 @@ module.exports = {
     exports  : true,
     database : true,
     view     : true
-  }
+  },
+  salt : 'theencryptsaltatleast32character',
 };

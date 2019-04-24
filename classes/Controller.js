@@ -56,10 +56,9 @@ class Controller{
       this.not_found(`${ this.constructor.name }::${action} not found`);
       return this.response;
     }
-
-    await this.before();
     this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
 
+    await this.before();
     this[action]();
     await this.after();
 
@@ -69,6 +68,11 @@ class Controller{
   not_found(msg){
     this.response.code(404);
     this.output = `404 / ${ msg }`;
+  }
+
+  redirect(location){
+    this.response.header('location', location);
+    this.response.code(302);
   }
 
   action_index(){

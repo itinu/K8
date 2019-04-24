@@ -35,6 +35,7 @@ class K8 {
   static checkConfigClearRequireCache(file){
     const config = require(resolve('site.js', 'config', K8.configPath));
     K8.cache = config.cache;
+    K8.config = config;
 
     if(!K8.cache.exports && (file.indexOf(K8.SYS_PATH) !== 0)){
       delete require.cache[file];
@@ -68,6 +69,6 @@ K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.17';
+K8.VERSION  = '0.0.19';
 
 module.exports = K8;
