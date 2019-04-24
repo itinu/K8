@@ -40,12 +40,7 @@ class Controller{
   }
 
   async after(){
-    try{
-      if(this.view) this.output = await this.view.render();
-    }catch(err){
-      this.response.code(500);
-      this.output = `500 / ${ err.message }`;
-    }
+
   }
 
   async execute(){
