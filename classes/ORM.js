@@ -15,7 +15,7 @@ class ORM extends Model{
    *
    * @returns {Model}
    */
-  getBelongs(model){
+  belongsTo(model){
     if(!this.constructor.belongsTo.includes(model)){
       throw new Error(`${this.constructor.name} is not belongs to ${model.name}`);
     }
@@ -28,8 +28,21 @@ class ORM extends Model{
     return Object.assign(new model(), belongs);
   }
 
-  getMany(model){
+  hasMany(model){
     if(!this.constructor.hasMany.includes(model)) {
+      throw new Error(`${this.constructor.name} is has many ${model.name}`);
+    }
+
+    if(!this.id)return [];
+
+    return ORM
+      .prepare(`SELECT * from ${model.tableName} WHERE ${this.constructor.key} = ?`)
+      .all(this.id)
+      .map(x => Object.assign(new model, x));
+  }
+
+  belongsToMany(model){
+    if(!this.constructor.belongsToMany.includes(model)) {
       throw new Error(`${this.constructor.name} is not belongs to ${model.name}`);
     }
 
@@ -51,7 +64,7 @@ class ORM extends Model{
   static get(model, id){
     return Object.assign(
       new model(),
-      ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ${id}`).get()
+      ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
     );
   }
 
@@ -67,13 +80,14 @@ class ORM extends Model{
     return ORM.db.prepare(sql);
   }
 
-  static createStaticVariables(model, tableName, fields, belongsTo, hasMany){
-    model.lowercase = model.name.toLowerCase();
-    model.key       = model.lowercase + '_id';
-    model.tableName = tableName || (this.lowercase + 's');
-    model.fields    = fields || [];
-    model.belongsTo = belongsTo || [];
-    model.hasMany   = hasMany || [];
+  static createStaticVariables(model, tableName, fields, belongsTo, hasMany, belongsToMany){
+    model.lowercase     = model.name.toLowerCase();
+    model.key           = model.lowercase + '_id';
+    model.tableName     = tableName     || (this.lowercase + 's');
+    model.fields        = fields        || [];
+    model.belongsTo     = belongsTo     || [];
+    model.hasMany       = hasMany       || [];
+    model.belongsToMany = belongsToMany || [];
   }
 }
 
