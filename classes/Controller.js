@@ -1,5 +1,5 @@
 const K8 = require('../K8');
-const ORM = K8.require('./ORM');
+const ORM = K8.require('ORM');
 
 class Controller{
   /**

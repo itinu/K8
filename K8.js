@@ -32,23 +32,27 @@ const resolve = (path, prefix, store)=>{
 };
 
 class K8 {
-  static checkConfigClearRequireCache(file){
-    const config = require(resolve('site.js', 'config', K8.configPath));
-    K8.cache = config.cache;
-    K8.config = config;
-
-    if(!K8.cache.exports && (file.indexOf(K8.SYS_PATH) !== 0)){
-      delete require.cache[file];
+  static clearCache(){
+    if(!K8.config.cache.exports){
+      for(let name in K8.classPath){
+        delete require.cache[K8.classPath[name]];
+      }
+      K8.classPath = {};
+      K8.configPath = {};
+    }
+    if(!K8.config.cache.view){
+      K8.viewPath = {};
     }
   }
 
+  static updateConfig(){
+    K8.config = require(resolve('site.js', 'config', K8.configPath));
+  }
+
   static require(path){
+    K8.updateConfig();
     const file = resolve(path+'.js', 'classes', K8.classPath);
-    const OBJ = require(file);
-
-    K8.checkConfigClearRequireCache(file);
-
-    return OBJ;
+    return require(file);
   }
 
   static resolveView(path){
@@ -56,19 +60,22 @@ class K8 {
   }
 }
 
-K8.cache = {
-  exports  : true,
-  database : true,
-  view     : true
+K8.config = {
+  cache:{
+    exports  : true,
+    database : true,
+    view     : true
+  }
 };
-K8.classPath = [];
-K8.viewPath = [];
-K8.configPath = [];
+
+K8.classPath  = {}; //{'ORM'          => 'APP_PATH/classes/ORM.js'}
+K8.viewPath   = {}; //{'layout/index' => 'APP_PATH/views/layout/index'}
+K8.configPath = {}; //{'site.js       => 'APP_PATH/config/site.js'}
 
 K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.21';
+K8.VERSION  = '0.0.27';
 
 module.exports = K8;
