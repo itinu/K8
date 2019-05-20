@@ -11,60 +11,62 @@ class ORM extends Model{
     this.updated_at = null;
   }
 
+  contains(ary, model, fk){
+    for(let i=0;i< this.constructor.belongsTo.length; i++){
+      const x = this.constructor.belongsTo[i];
+      if(x.model === model && x.fk === fk){
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   /**
    *
    * @returns {Model}
    */
-  belongsTo(model){
-    if(!this.constructor.belongsTo.includes(model)){
-      throw new Error(`${this.constructor.name} is not belongs to ${model.name}`);
-    }
+  belongsTo(modelName, fk){
+    if(!this.id)return null;
+    const m = K8.require(`model/${modelName}`);
 
-    if(!this.id || !this[model.key])return null;
-
-    const belongs = ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(this[model.key]);
+    const belongs = ORM.prepare(`SELECT * from ${m.tableName} WHERE id = ?`).get(this[fk]);
     if(!belongs)return null;
 
-    return Object.assign(new model(), belongs);
+    return Object.assign(new m(), belongs);
   }
 
-  hasMany(model){
-    if(!this.constructor.hasMany.includes(model)) {
-      throw new Error(`${this.constructor.name} is has many ${model.name}`);
-    }
-
+  hasMany(modelName, fk){
     if(!this.id)return [];
+    const m = K8.require(`model/${modelName}`);
 
     return ORM
-      .prepare(`SELECT * from ${model.tableName} WHERE ${this.constructor.key} = ?`)
+      .prepare(`SELECT * from ${m.tableName} WHERE ${fk} = ?`)
       .all(this.id)
-      .map(x => Object.assign(new model, x));
+      .map(x => Object.assign(new m(), x));
   }
 
-  belongsToMany(model){
-    if(!this.constructor.belongsToMany.includes(model)) {
-      throw new Error(`${this.constructor.name} is not belongs to ${model.name}`);
-    }
-
-    //no id, one to many relation must return an empty array.
-    if(!this.id){
-      return [];
-    }
+  belongsToMany(modelName){
+    if(!this.id)return [];
+    const m = K8.require(`model/${modelName}`);
 
     return ORM
-      .prepare(`SELECT * from ${model.tableName} WHERE id in (SELECT ${model.key} from ${this.constructor.lowercase}_${model.tableName} WHERE ${this.constructor.key} = ?)`)
+      .prepare(`SELECT * from ${m.tableName} WHERE id in (SELECT ${m.key} from ${this.constructor.lowercase}_${m.tableName} WHERE ${this.constructor.key} = ?)`)
       .all(this.id)
-      .map(x => Object.assign(new model(), x));
+      .map(x => Object.assign(new m(), x));
   }
 
-  static all(model) {
-    return ORM.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(), x));
+  static all(modelName) {
+    const m = K8.require(`model/${modelName}`);
+    return ORM.prepare(`SELECT * from ${m.tableName}`).all().map(x => Object.assign(new m(), x));
   }
 
-  static get(model, id){
+  static get(modelName, id){
+    const m = K8.require(`model/${modelName}`);
+
     return Object.assign(
-      new model(),
-      ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
+      new m(),
+      ORM.prepare(`SELECT * from ${m.tableName} WHERE id = ?`).get(id)
     );
   }
 
@@ -82,8 +84,8 @@ class ORM extends Model{
 
   static createStaticVariables(model, tableName, fields, belongsTo, hasMany, belongsToMany){
     model.lowercase     = model.name.toLowerCase();
+    model.tableName     = tableName     || (model.lowercase + 's');
     model.key           = model.lowercase + '_id';
-    model.tableName     = tableName     || (this.lowercase + 's');
     model.fields        = fields        || [];
     model.belongsTo     = belongsTo     || [];
     model.hasMany       = hasMany       || [];
