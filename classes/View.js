@@ -30,8 +30,13 @@ class View{
 
     return Object.assign({}, View.globalData, props);
   }
+
+  static clearCache(){
+    View.caches = {};
+  }
 }
 
+View.caches = {};
 View.globalData = {};
 
 module.exports = View;
