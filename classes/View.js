@@ -12,8 +12,6 @@ class View{
   constructor(file, data){
     this.file = file;
     this.data = data;
-
-    this.realPath = K8.resolveView(this.file);
   }
 
   async render(){
@@ -38,5 +36,6 @@ class View{
 
 View.caches = {};
 View.globalData = {};
+View.defaultViewClass = View;
 
 module.exports = View;

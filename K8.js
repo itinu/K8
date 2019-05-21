@@ -32,6 +32,18 @@ const resolve = (path, prefix, store)=>{
 };
 
 class K8 {
+  static reloadModuleInit(){
+    //activate init.js in modules
+    bootstrap.modules.forEach(x => {
+      const initPath = `${MOD_PATH}/${x}/init.js`;
+
+      if(fs.existsSync(initPath)){
+        require(initPath);
+        delete require.cache[initPath];
+      }
+    });
+  }
+
   static clearCache(){
     K8.updateConfig();
     if(!K8.config.cache.exports){
@@ -44,6 +56,7 @@ class K8 {
     if(!K8.config.cache.view){
       K8.viewPath = {};
     }
+    K8.reloadModuleInit();
   }
 
   static updateConfig(){
@@ -76,15 +89,8 @@ K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.34';
+K8.VERSION  = '0.0.41';
 
 module.exports = K8;
 
-//activate init.js in modules
-bootstrap.modules.forEach(x => {
-  const initPath = `${MOD_PATH}/${x}/init.js`;
-
-  if(fs.existsSync(initPath)){
-    require(initPath);
-  }
-});
+K8.reloadModuleInit();
