@@ -33,6 +33,7 @@ const resolve = (path, prefix, store)=>{
 
 class K8 {
   static clearCache(){
+    K8.updateConfig();
     if(!K8.config.cache.exports){
       for(let name in K8.classPath){
         delete require.cache[K8.classPath[name]];
@@ -50,7 +51,6 @@ class K8 {
   }
 
   static require(path){
-    K8.updateConfig();
     const file = resolve(path+'.js', 'classes', K8.classPath);
     return require(file);
   }
@@ -76,6 +76,15 @@ K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.29';
+K8.VERSION  = '0.0.32';
 
 module.exports = K8;
+
+//activate init.js in modules
+bootstrap.modules.forEach(x => {
+  const initPath = `${MOD_PATH}/${x}/init.js`;
+
+  if(fs.existsSync(initPath)){
+    require(initPath);
+  }
+});

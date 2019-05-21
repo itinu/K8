@@ -17,7 +17,7 @@ class View{
   }
 
   async render(){
-    return '';
+    return JSON.stringify(this.data);
   }
 
   collectProps(){
