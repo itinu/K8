@@ -56,17 +56,14 @@ class ORM extends Model{
       .map(x => Object.assign(new m(), x));
   }
 
-  static all(modelName) {
-    const m = K8.require(`model/${modelName}`);
-    return ORM.prepare(`SELECT * from ${m.tableName}`).all().map(x => Object.assign(new m(), x));
+  static all(model) {
+    return ORM.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(), x));
   }
 
-  static get(modelName, id){
-    const m = K8.require(`model/${modelName}`);
-
+  static get(model, id){
     return Object.assign(
-      new m(),
-      ORM.prepare(`SELECT * from ${m.tableName} WHERE id = ?`).get(id)
+      new model(),
+      ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
     );
   }
 
