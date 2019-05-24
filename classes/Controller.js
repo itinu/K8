@@ -58,7 +58,7 @@ class Controller{
       const action = `action_${this.request.params.action || 'index'}`;
 
       if(this[action] === undefined){
-        this.not_found(`${ this.constructor.name }::${action} not found`);
+        this.notFound(`${ this.constructor.name }::${action} not found`);
         return this.response;
       }
       this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
@@ -75,7 +75,7 @@ class Controller{
     return this.response;
   }
 
-  not_found(msg){
+  notFound(msg){
     this.response.code(404);
     this.output = `404 / ${ msg }`;
 

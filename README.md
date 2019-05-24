@@ -29,3 +29,62 @@ ORM provide following static variables:
 - ORM.belongsTo
   - list of the class belongs
 - ORM.hasMany 
+
+
+## Controller
+Controller provide basic flow of execution.
+1. constructor
+2. before
+3. action_xxx
+4. after
+
+it also provide basic function
+1. redirect(location);
+2. notFound(msg);
+
+default action:
+1. action_index
+
+## Controller Mixin
+We can use extends to provide addition features to controller, but it will increase complexity and unused functions to child classes.
+
+Controller Mixin introduced to prevent problems create by extends.
+
+```
+//sample controller mixin
+class SampleMixin extends ControllerMixin{
+
+//client is a controller
+constructor(client)
+
+//add function on before
+async before()
+async after()
+
+//manually called by client controller
+action_index()
+action_something()
+
+//additional functions
+getView(path, data)
+moreFunctions(arg)
+
+}
+```
+sample code to add mixin in controller
+
+```
+
+class ControllerView extends Controller{
+  constructor(request, response){
+    super(request, response);
+    //add mixin in constructor
+    this.addMixin(this.mixinView = new SampleMixin(this));
+  }
+  
+  action_index(){
+    this.tpl = this.mixinView.getView('home', {});
+  }
+}
+
+```
