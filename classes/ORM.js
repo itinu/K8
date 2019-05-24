@@ -79,11 +79,12 @@ class ORM extends Model{
     return ORM.db.prepare(sql);
   }
 
-  static createStaticVariables(model, tableName, fields, belongsTo, hasMany, belongsToMany){
+  static createStaticVariables(model, tableName, fieldType, belongsTo, hasMany, belongsToMany){
     model.lowercase     = model.name.toLowerCase();
     model.tableName     = tableName     || (model.lowercase + 's');
     model.key           = model.lowercase + '_id';
-    model.fields        = fields        || [];
+    model.fieldType     = model.fieldType || {};
+
     model.belongsTo     = belongsTo     || [];
     model.hasMany       = hasMany       || [];
     model.belongsToMany = belongsToMany || [];

@@ -6,13 +6,14 @@ const APP_PATH = EXE_PATH + '/application';
 const MOD_PATH = EXE_PATH + '/modules';
 
 const bootstrap = require(`${APP_PATH}/bootstrap.js`);
+const modulesReverse = [...bootstrap.modules].reverse();
 
 const resolve = (path, prefix, store)=>{
   if(!store[path]){
     //search application, then modules, then system
     const fetchList = [`${APP_PATH}/${prefix}/${path}`];
 
-    bootstrap.modules.forEach(x => fetchList.push(`${MOD_PATH}/${x}/${prefix}/${path}`));
+    modulesReverse.forEach(x => fetchList.push(`${MOD_PATH}/${x}/${prefix}/${path}`));
     fetchList.push(`${SYS_PATH}/${prefix}/${path}`);
 
     for(let i=0; i<fetchList.length; i++){
@@ -89,8 +90,9 @@ K8.SYS_PATH = SYS_PATH;
 K8.EXE_PATH = EXE_PATH;
 K8.APP_PATH = APP_PATH;
 K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.41';
+K8.VERSION  = '0.0.50';
 
 module.exports = K8;
 
+K8.updateConfig();
 K8.reloadModuleInit();

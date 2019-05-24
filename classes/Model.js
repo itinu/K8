@@ -3,6 +3,4 @@ class Model{
 }
 
 Model.lowercase = 'model';
-Model.fields = [];
-
 module.exports = Model;

@@ -1,5 +1,4 @@
-const K8 = require('../K8');
-const ORM = K8.require('ORM');
+let redirected = false;
 
 class Controller{
   /**
@@ -10,12 +9,8 @@ class Controller{
   constructor(request, response){
     this.request = request;
     this.response = response;
-    this.instances = [];
-    this.instance = null;
     this.output = '';
-    this.model = ORM;
-
-    this.view = null;
+    this.mixins = [];
 
     this.format = this.request.params.format || 'html';
 
@@ -35,27 +30,47 @@ class Controller{
     }
   }
 
-  async before(){
+  /**
+   *
+   * @param {ControllerMixin} mixin
+   * @returns {ControllerMixin}
+   */
+  addMixin(mixin){
+    this.mixins.push(mixin);
+    return mixin;
+  }
 
+  async before(){
+    for(let i = 0; i < this.mixins.length; i++){
+      await this.mixins[i].before();
+    }
   }
 
   async after(){
-
+    for(let i = 0; i < this.mixins.length; i++){
+      await this.mixins[i].after();
+    }
   }
 
   async execute(){
-    //guard check function action_* exist
-    const action = `action_${this.request.params.action || 'index'}`;
+    try{
+      //guard check function action_* exist
+      const action = `action_${this.request.params.action || 'index'}`;
 
-    if(this[action] === undefined){
-      this.not_found(`${ this.constructor.name }::${action} not found`);
-      return this.response;
+      if(this[action] === undefined){
+        this.not_found(`${ this.constructor.name }::${action} not found`);
+        return this.response;
+      }
+      this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
+
+      if(!redirected)await this.before();
+      if(!redirected)this[action]();
+      if(!redirected)await this.after();
+
+    }catch(err){
+      this.response.code(500);
+      this.output = `500 / ${ err.message }`;
     }
-    this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
-
-    await this.before();
-    this[action]();
-    await this.after();
 
     return this.response;
   }
@@ -63,19 +78,17 @@ class Controller{
   not_found(msg){
     this.response.code(404);
     this.output = `404 / ${ msg }`;
+
+    redirected = true;
   }
 
   redirect(location){
     this.response.header('location', location);
     this.response.code(302);
+    redirected = true;
   }
 
   action_index(){
-    this.instances = ORM.all(this.model);
-  }
-
-  action_read(){
-    this.instance = ORM.get(this.model, this.request.params.id);
   }
 }
 
