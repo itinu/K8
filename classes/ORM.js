@@ -79,7 +79,7 @@ class ORM extends Model{
     return ORM.db.prepare(sql);
   }
 
-  static createStaticVariables(model, tableName, fieldType, belongsTo, hasMany, belongsToMany){
+/*  static createStaticVariables(model, tableName, fieldType, belongsTo, hasMany, belongsToMany){
     model.lowercase     = model.name.toLowerCase();
     model.tableName     = tableName     || (model.lowercase + 's');
     model.key           = model.lowercase + '_id';
@@ -88,9 +88,9 @@ class ORM extends Model{
     model.belongsTo     = belongsTo     || [];
     model.hasMany       = hasMany       || [];
     model.belongsToMany = belongsToMany || [];
-  }
+  }*/
 }
 
-ORM.createStaticVariables(ORM);
+//ORM.createStaticVariables(ORM);
 
 module.exports = ORM;

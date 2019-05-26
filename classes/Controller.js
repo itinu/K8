@@ -69,7 +69,7 @@ class Controller{
 
     }catch(err){
       this.response.code(500);
-      this.output = `500 / ${ err.message }`;
+      this.output = `<pre>500 / ${ err.message }\n\n ${ err.stack }</pre>`;
     }
 
     return this.response;
