@@ -33,9 +33,9 @@ class View{
     View.caches = {};
   }
 }
-
-View.caches = {};
-View.globalData = {};
 View.defaultViewClass = View;
+
+View.clearCache();
+View.globalData = {};
 
 module.exports = View;
