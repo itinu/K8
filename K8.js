@@ -1,20 +1,13 @@
 const fs = require('fs');
 
-const SYS_PATH = require.resolve(`./K8`).replace('/K8.js', '');
-const EXE_PATH = fs.realpathSync('./');
-const APP_PATH = EXE_PATH + '/application';
-const MOD_PATH = EXE_PATH + '/modules';
-
-const bootstrap = require(`${APP_PATH}/bootstrap.js`);
-const modulesReverse = [...bootstrap.modules].reverse();
-
 const resolve = (path, prefix, store)=>{
   if(!store[path]){
     //search application, then modules, then system
-    const fetchList = [`${APP_PATH}/${prefix}/${path}`];
+    const fetchList = [`${K8.APP_PATH}/${prefix}/${path}`];
 
-    modulesReverse.forEach(x => fetchList.push(`${MOD_PATH}/${x}/${prefix}/${path}`));
-    fetchList.push(`${SYS_PATH}/${prefix}/${path}`);
+    [...K8.bootstrap.modules].reverse().forEach(x => fetchList.push(`${K8.MOD_PATH}/${x}/${prefix}/${path}`));
+    fetchList.push(`${K8.SYS_PATH}/${prefix}/${path}`);
+    [...K8.nodePackages].reverse().forEach(x => fetchList.push(`${x}/${prefix}/${path}`));
 
     for(let i=0; i<fetchList.length; i++){
       const x = fetchList[i];
@@ -33,16 +26,28 @@ const resolve = (path, prefix, store)=>{
 };
 
 class K8 {
+  static addNodeModules(packageFolder){
+    K8.nodePackages.push(packageFolder.replace('/index.js', ''));
+  }
+
   static reloadModuleInit(){
     //activate init.js in modules
-    bootstrap.modules.forEach(x => {
-      const initPath = `${MOD_PATH}/${x}/init.js`;
+    K8.bootstrap.modules.forEach(x => {
+      const initPath = `${K8.MOD_PATH}/${x}/init.js`;
 
       if(fs.existsSync(initPath)){
         require(initPath);
         delete require.cache[initPath];
       }
     });
+
+    K8.nodePackages.forEach(x =>{
+      const initPath = `${x}/init.js`;
+      if(fs.existsSync(initPath)){
+        require(initPath);
+        delete require.cache[initPath];
+      }
+    })
   }
 
   static clearCache(){
@@ -53,6 +58,7 @@ class K8 {
       }
       K8.classPath = {};
       K8.configPath = {};
+      K8.nodePackages = [];
     }
     if(!K8.config.cache.view){
       K8.viewPath = {};
@@ -85,14 +91,17 @@ K8.config = {
 K8.classPath  = {}; //{'ORM'          => 'APP_PATH/classes/ORM.js'}
 K8.viewPath   = {}; //{'layout/index' => 'APP_PATH/views/layout/index'}
 K8.configPath = {}; //{'site.js       => 'APP_PATH/config/site.js'}
+K8.nodePackages = [];
 
-K8.SYS_PATH = SYS_PATH;
-K8.EXE_PATH = EXE_PATH;
-K8.APP_PATH = APP_PATH;
-K8.MOD_PATH = MOD_PATH;
-K8.VERSION  = '0.0.55';
+K8.SYS_PATH = require.resolve(`./K8`).replace('/K8.js', '');
+K8.EXE_PATH = fs.realpathSync('./');
+K8.APP_PATH = K8.EXE_PATH + '/application';
+K8.MOD_PATH = K8.EXE_PATH + '/modules';
+K8.VERSION  = '0.0.63';
 
 module.exports = K8;
+
+K8.bootstrap = require(`${K8.APP_PATH}/bootstrap.js`);
 
 K8.updateConfig();
 K8.reloadModuleInit();
