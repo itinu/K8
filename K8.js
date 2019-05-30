@@ -58,7 +58,6 @@ class K8 {
       }
       K8.classPath = {};
       K8.configPath = {};
-      K8.nodePackages = [];
     }
     if(!K8.config.cache.view){
       K8.viewPath = {};
@@ -97,7 +96,7 @@ K8.SYS_PATH = require.resolve(`./K8`).replace('/K8.js', '');
 K8.EXE_PATH = fs.realpathSync('./');
 K8.APP_PATH = K8.EXE_PATH + '/application';
 K8.MOD_PATH = K8.EXE_PATH + '/modules';
-K8.VERSION  = '0.0.63';
+K8.VERSION  = '0.0.64';
 
 module.exports = K8;
 

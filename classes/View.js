@@ -9,9 +9,10 @@ class View{
     View.globalData[key] = value;
   }
 
-  constructor(file, data){
+  constructor(file, data, lookupDir){
     this.file = file;
     this.data = data;
+    this.lookupDir = lookupDir;
   }
 
   async render(){
