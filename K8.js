@@ -96,7 +96,7 @@ K8.SYS_PATH = require.resolve(`./K8`).replace('/K8.js', '');
 K8.EXE_PATH = fs.realpathSync('./');
 K8.APP_PATH = K8.EXE_PATH + '/application';
 K8.MOD_PATH = K8.EXE_PATH + '/modules';
-K8.VERSION  = '0.0.64';
+K8.VERSION  = '0.0.65';
 
 module.exports = K8;
 

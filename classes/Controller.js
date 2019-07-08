@@ -5,7 +5,7 @@ class Controller{
    * @param {Reply} response
    */
   constructor(request, response){
-    this.redirected = false;
+    this.headerSent = false;
 
     this.request = request;
     this.response = response;
@@ -63,9 +63,9 @@ class Controller{
       }
       this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
 
-      if(!this.redirected)await this.before();
-      if(!this.redirected)this[action]();
-      if(!this.redirected)await this.after();
+      if(!this.headerSent)await this.before();
+      if(!this.headerSent)await this[action]();
+      if(!this.headerSent)await this.after();
 
     }catch(err){
       this.response.code(500);
@@ -79,16 +79,16 @@ class Controller{
     this.response.code(404);
     this.output = `404 / ${ msg }`;
 
-    this.redirected = true;
+    this.headerSent = true;
   }
 
   redirect(location){
     this.response.header('location', location);
     this.response.code(302);
-    this.redirected = true;
+    this.headerSent = true;
   }
 
-  action_index(){
+  async action_index(){
   }
 }
 
