@@ -11,23 +11,6 @@ class Controller{
     this.response = response;
     this.output = '';
     this.mixins = [];
-
-    this.format = this.request.params.format || 'html';
-
-    switch(this.format){
-      case 'json':
-        this.response.type('text/json; charset=utf-8');
-        break;
-      case 'png':
-        this.response.type('image/png');
-        break;
-      case 'jpg':
-      case 'jpeg':
-        this.response.type('image/jpeg');
-        break;
-      default:
-        this.response.type('text/html; charset=utf-8');
-    }
   }
 
   /**
@@ -77,21 +60,39 @@ class Controller{
     return this.response;
   }
 
+  /**
+   *
+   * @param {Error} err
+   */
   serverError(err){
-    this.response.code(500);
     this.output = `<pre>500 / ${ err.message }\n\n ${ err.stack }</pre>`;
-    this.headerSent = true;
+    this.exit(500);
   }
 
+  /**
+   *
+   * @param {string} msg
+   */
   notFound(msg){
-    this.response.code(404);
     this.output = `404 / ${ msg }`;
-    this.headerSent = true;
+    this.exit(404);
   }
 
+  /**
+   *
+   * @param {string} location
+   */
   redirect(location){
     this.response.header('location', location);
-    this.response.code(302);
+    this.exit(302);
+  }
+
+  /**
+   *
+   * @param {Number} code
+   */
+  exit(code){
+    this.response.code(code);
     this.headerSent = true;
   }
 
