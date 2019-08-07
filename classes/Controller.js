@@ -11,6 +11,9 @@ class Controller{
     this.response = response;
     this.output = '';
     this.mixins = [];
+
+    //default mime is text/html
+    this.response.type('text/html; charset=utf-8');
   }
 
   /**
@@ -45,11 +48,13 @@ class Controller{
         return this.response;
       }
 
-      for(let i = 0; i < this.mixins.length; i++){
-        await this.mixins[i].execute(action);
-      }
 
       if(!this.headerSent)await this.before();
+      if(!this.headerSent){
+        for(let i = 0; i < this.mixins.length; i++){
+          await this.mixins[i].execute(action);
+        }
+      }
       if(!this.headerSent)await this[action]();
       if(!this.headerSent)await this.after();
 
