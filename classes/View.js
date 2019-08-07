@@ -1,5 +1,3 @@
-const K8 = require('../K8');
-
 class View{
   static factory(file, data){
     return new View(file, data);

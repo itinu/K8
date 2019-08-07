@@ -61,24 +61,31 @@ class Controller{
         this.notFound(`${ this.constructor.name }::${action} not found`);
         return this.response;
       }
-      this.response.header('X-ZOPS-Controller-Action', `${ this.constructor.name }::${action}`);
+
+      for(let i = 0; i < this.mixins.length; i++){
+        await this.mixins[i].execute(action);
+      }
 
       if(!this.headerSent)await this.before();
       if(!this.headerSent)await this[action]();
       if(!this.headerSent)await this.after();
 
     }catch(err){
-      this.response.code(500);
-      this.output = `<pre>500 / ${ err.message }\n\n ${ err.stack }</pre>`;
+      this.serverError(err);
     }
 
     return this.response;
   }
 
+  serverError(err){
+    this.response.code(500);
+    this.output = `<pre>500 / ${ err.message }\n\n ${ err.stack }</pre>`;
+    this.headerSent = true;
+  }
+
   notFound(msg){
     this.response.code(404);
     this.output = `404 / ${ msg }`;
-
     this.headerSent = true;
   }
 

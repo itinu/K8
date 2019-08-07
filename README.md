@@ -4,18 +4,32 @@ Node.js MVC structure base on Kohana Framework
 [!!! this module still under development !!!]
 
 ```
--- application
+-- server
+ L application
+   L config
+   L logs
+   L classes
+   L views
  L modules
+   L example
+     L index.js
+     L init.js
+     L classes
+     L views
  L system
 ```
 
 system is this repository.
 
-K8 depends on better-sqlite3
-centOS may require install g++ to compile driver.
 
-```sudo yum install /usr/bin/g++```
+## Bootstrap
+module.exports = {
+  modules: [
+    //place modules name here.
+  ],
+};
 
+## ORM
 ORM provide following static variables:
 
 - ORM.lowercase

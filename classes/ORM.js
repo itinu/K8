@@ -1,5 +1,3 @@
-const Database  = require('better-sqlite3');
-
 const K8 = require('../K8');
 const Model = K8.require('Model');
 
@@ -9,6 +7,7 @@ class ORM extends Model{
     this.id = null;
     this.created_at = null;
     this.updated_at = null;
+    this.lowercase  = this.constructor.name.toLowerCase();
   }
 
   contains(ary, model, fk){
@@ -51,15 +50,26 @@ class ORM extends Model{
     const m = K8.require(`model/${modelName}`);
 
     return ORM
-      .prepare(`SELECT * from ${m.tableName} WHERE id in (SELECT ${m.key} from ${this.constructor.lowercase}_${m.tableName} WHERE ${this.constructor.key} = ?)`)
+      .prepare(`SELECT * from ${m.tableName} WHERE id in (SELECT ${m.key} from ${this.lowercase}_${m.tableName} WHERE ${this.constructor.key} = ?)`)
       .all(this.id)
       .map(x => Object.assign(new m(), x));
   }
 
+  /**
+   *
+   * @param {Model} model
+   * @returns {Array}
+   */
   static all(model) {
     return ORM.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(), x));
   }
 
+  /**
+   *
+   * @param {Model} model
+   * @param {Number} id
+   * @returns {Object}
+   */
   static get(model, id){
     return Object.assign(
       new model(),

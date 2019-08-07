@@ -1,6 +1,6 @@
 {
   "name": "k8mvc",
-  "version": "0.0.65",
+  "version": "0.1.7",
   "description": "Node.js MVC file structure base on Kohana Framework",
   "main": "K8.js",
   "scripts": {
@@ -17,6 +17,5 @@
   },
   "homepage": "https://github.com/digi3colin/K8#readme",
   "dependencies": {
-    "better-sqlite3": "^5.4.0"
   }
 }
