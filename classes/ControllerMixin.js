@@ -14,6 +14,8 @@ class ControllerMixin {
    * @param {String} action
    * @returns {Promise<void>}
    */
-  async execute(action){}
+  async execute(action){
+    if(this[action] !== undefined)this[action]();
+  }
 }
 module.exports = ControllerMixin;
