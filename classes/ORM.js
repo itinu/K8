@@ -1,58 +1,55 @@
 const K8 = require('../K8');
 const Model = K8.require('Model');
 
+//static private function
+function assignTableName(model){
+  model.jointTablePrefix = model.name.toLowerCase();
+  model.tableName = model.jointTablePrefix + 's';
+}
+
 class ORM extends Model{
-  constructor(){
+  constructor(id = null){
     super();
-    this.id = null;
+    this.id = id;
     this.created_at = null;
     this.updated_at = null;
-    this.lowercase  = this.constructor.name.toLowerCase();
-  }
 
-  contains(ary, model, fk){
-    for(let i=0;i< this.constructor.belongsTo.length; i++){
-      const x = this.constructor.belongsTo[i];
-      if(x.model === model && x.fk === fk){
-        return true;
+    if(this.constructor !== ORM){
+      if(!this.constructor.tableName){
+        assignTableName(this.constructor);
+      }
+
+      if(!this.constructor.jointTablePrefix){
+        this.constructor.jointTablePrefix = this.constructor.tableName.replace(/s$/i, '')//singluar tableName;
       }
     }
 
-    return false;
+    if(id !== null){
+      Object.assign(this, ORM.get(this.constructor, id));
+    }
+  }
+
+  /**
+   * belongs to - this table have xxx_id column
+   * @param fk
+   * @returns {Model}
+   */
+  belongsTo(fk){
+    const modelName = this.constructor.belongsTo.find(x => x.fk === fk).model;
+    const model = K8.require(`models/${modelName}`);
+    return ORM.get(model, this[fk]);
   }
 
   /**
    *
-   * @returns {Model}
+   * @param {Model} model
    */
-  belongsTo(modelName, fk){
-    if(!this.id)return null;
-    const m = K8.require(`model/${modelName}`);
+  belongsToMany(model){
+    const jointTableName = this.constructor.jointTablePrefix + '_' +model.tableName;
 
-    const belongs = ORM.prepare(`SELECT * from ${m.tableName} WHERE id = ?`).get(this[fk]);
-    if(!belongs)return null;
-
-    return Object.assign(new m(), belongs);
-  }
-
-  hasMany(modelName, fk){
-    if(!this.id)return [];
-    const m = K8.require(`model/${modelName}`);
-
-    return ORM
-      .prepare(`SELECT * from ${m.tableName} WHERE ${fk} = ?`)
-      .all(this.id)
-      .map(x => Object.assign(new m(), x));
-  }
-
-  belongsToMany(modelName){
-    if(!this.id)return [];
-    const m = K8.require(`model/${modelName}`);
-
-    return ORM
-      .prepare(`SELECT * from ${m.tableName} WHERE id in (SELECT ${m.key} from ${this.lowercase}_${m.tableName} WHERE ${this.constructor.key} = ?)`)
-      .all(this.id)
-      .map(x => Object.assign(new m(), x));
+    return ORM.prepare(`SELECT * FROM ${jointTableName} WHERE ${this.constructor.key} = ?`)
+        .all(this.id)
+        .map(x => new model(x[model.key]));
   }
 
   /**
@@ -61,6 +58,8 @@ class ORM extends Model{
    * @returns {Array}
    */
   static all(model) {
+    if(!model.tableName)assignTableName(model);
+
     return ORM.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(), x));
   }
 
@@ -71,9 +70,11 @@ class ORM extends Model{
    * @returns {Object}
    */
   static get(model, id){
+    if(!model.tableName)assignTableName(model);
+
     return Object.assign(
-      new model(),
-      ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
+        new model(),
+        ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
     );
   }
 
@@ -85,22 +86,22 @@ class ORM extends Model{
     ORM.db = db;
   }
 
+  /**
+   *
+   * @param {string} sql
+   */
   static prepare(sql){
     return ORM.db.prepare(sql);
   }
-
-/*  static createStaticVariables(model, tableName, fieldType, belongsTo, hasMany, belongsToMany){
-    model.lowercase     = model.name.toLowerCase();
-    model.tableName     = tableName     || (model.lowercase + 's');
-    model.key           = model.lowercase + '_id';
-    model.fieldType     = model.fieldType || {};
-
-    model.belongsTo     = belongsTo     || [];
-    model.hasMany       = hasMany       || [];
-    model.belongsToMany = belongsToMany || [];
-  }*/
 }
 
-//ORM.createStaticVariables(ORM);
+//ORM is abstract, jointTablePrefix and tableName must be undefined.
+ORM.jointTablePrefix = undefined;
+ORM.tableName = undefined;
+ORM.key = undefined;
+ORM.fieldType = {};
+ORM.belongsTo = [];
+ORM.hasMany   = [];
+ORM.belongsToMany = [];
 
 module.exports = ORM;

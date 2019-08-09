@@ -93,11 +93,11 @@ class ControllerView extends Controller{
   constructor(request, response){
     super(request, response);
     //add mixin in constructor
-    this.addMixin(this.mixinView = new SampleMixin(this));
+    this.addMixin(new SampleMixin(this));
   }
   
   action_index(){
-    this.tpl = this.mixinView.getView('home', {});
+    this.tpl = this.getView('home', {});
   }
 }
 

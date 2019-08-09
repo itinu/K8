@@ -1,29 +1,29 @@
 const fs = require('fs');
 
 //private resolve
-const resolve = (path, prefix, store)=>{
-  if(!store[path]){
+const resolve = (pathToFile, prefixPath, store)=>{
+  if(!store[pathToFile]){
     //search application, then modules, then system
-    const fetchList = [`${K8.APP_PATH}/${prefix}/${path}`];
+    const fetchList = [`${K8.APP_PATH}/${prefixPath}/${pathToFile}`];
 
-    [...K8.bootstrap.modules].reverse().forEach(x => fetchList.push(`${K8.MOD_PATH}/${x}/${prefix}/${path}`));
-    fetchList.push(`${K8.SYS_PATH}/${prefix}/${path}`);
-    [...K8.nodePackages].reverse().forEach(x => fetchList.push(`${x}/${prefix}/${path}`));
+    [...K8.bootstrap.modules].reverse().forEach(x => fetchList.push(`${K8.MOD_PATH}/${x}/${prefixPath}/${pathToFile}`));
+    fetchList.push(`${K8.SYS_PATH}/${prefixPath}/${pathToFile}`);
+    [...K8.nodePackages].reverse().forEach(x => fetchList.push(`${x}/${prefixPath}/${pathToFile}`));
 
     for(let i=0; i<fetchList.length; i++){
       const x = fetchList[i];
       if(fs.existsSync(x)){
-        store[path] = x;
+        store[pathToFile] = x;
         break;
       }
     }
 
-    if(!store[path]){
-      throw new Error(`K8 resolve path error: path ${path} not found`);
+    if(!store[pathToFile]){
+      throw new Error(`K8 resolve path error: path ${pathToFile} not found`);
     }
   }
 
-  return store[path];
+  return store[pathToFile];
 };
 
 const setPath = (EXE_PATH = null, APP_PATH = null, MOD_PATH = null) => {
@@ -64,7 +64,7 @@ const reloadModuleInit = () => {
 
 class K8 {
   static init(EXE_PATH = null, APP_PATH = null, MOD_PATH = null){
-    K8.VERSION  = '0.1.11';
+    K8.VERSION  = '0.1.14';
 
     K8.config = require('./config/site');
 
@@ -108,13 +108,13 @@ class K8 {
     reloadModuleInit();
   }
 
-  static require(path){
-    const file = resolve(path+'.js', 'classes', K8.classPath);
+  static require(pathToFile){
+    const file = resolve(pathToFile+'.js', 'classes', K8.classPath);
     return require(file);
   }
 
-  static resolveView(path){
-    return resolve(path, 'views', K8.viewPath);
+  static resolveView(pathToFile){
+    return resolve(pathToFile, 'views', K8.viewPath);
   }
 }
 
