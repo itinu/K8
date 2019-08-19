@@ -41,6 +41,16 @@ class ORM extends Model{
   }
 
   /**
+   * has many
+   */
+  hasMany(model){
+    if(!model.tableName)assignTableName(model);
+
+    const key = this.constructor.key;
+    return ORM.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id);
+  }
+
+  /**
    *
    * @param {Model} model
    */
