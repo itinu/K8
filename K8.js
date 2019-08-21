@@ -19,7 +19,7 @@ const resolve = (pathToFile, prefixPath, store)=>{
     }
 
     if(!store[pathToFile]){
-      throw new Error(`K8 resolve path error: path ${pathToFile} not found`);
+      throw new Error(`K8 resolve path error: path ${pathToFile} not found. ${prefixPath} , ${JSON.stringify(store)} `);
     }
   }
 
@@ -64,7 +64,7 @@ const reloadModuleInit = () => {
 
 class K8 {
   static init(EXE_PATH = null, APP_PATH = null, MOD_PATH = null){
-    K8.VERSION  = '0.1.17';
+    K8.VERSION  = '0.1.18';
 
     K8.config = require('./config/site');
 
