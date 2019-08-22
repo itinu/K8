@@ -64,7 +64,7 @@ const reloadModuleInit = () => {
 
 class K8 {
   static init(EXE_PATH = null, APP_PATH = null, MOD_PATH = null){
-    K8.VERSION  = '0.1.18';
+    K8.VERSION  = '0.1.20';
 
     K8.config = require('./config/site');
 

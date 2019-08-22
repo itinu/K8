@@ -30,6 +30,21 @@ class ORM extends Model{
   }
 
   /**
+   * @return ORM
+   */
+  save(){
+    const sql = (this.id) ?
+        `UPDATE ${this.constructor.tableName} SET ${Object.keys(this.constructor.fieldType).map(x => `${x} = ?`).join(', ')} WHERE id = ?` :
+        `INSERT INTO ${this.constructor.tableName} (${Object.keys(this.constructor.fieldType).join(', ')}) VALUES (${Object.keys(this.constructor.fieldType).map(x => `?`).join(', ')})` ;
+    const values = Object.keys(this.constructor.fieldType).map(x => this[x]);
+
+    const res = ORM.prepare(sql).run(...values);
+    this.id = this.id || res.lastInsertRowid;
+
+    return this;
+  }
+
+  /**
    * belongs to - this table have xxx_id column
    * @param fk
    * @returns {Model}
