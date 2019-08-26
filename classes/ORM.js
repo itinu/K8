@@ -33,10 +33,15 @@ class ORM extends Model{
    * @return ORM
    */
   save(){
+    const tableName = this.constructor.tableName;
+    const columns = Object.keys(this.constructor.fieldType);
+    //add belongsTo to columns
+    this.constructor.belongsTo.forEach(x => columns.push(x.fk));
+
     const sql = (this.id) ?
-        `UPDATE ${this.constructor.tableName} SET ${Object.keys(this.constructor.fieldType).map(x => `${x} = ?`).join(', ')} WHERE id = ?` :
-        `INSERT INTO ${this.constructor.tableName} (${Object.keys(this.constructor.fieldType).join(', ')}) VALUES (${Object.keys(this.constructor.fieldType).map(x => `?`).join(', ')})` ;
-    const values = Object.keys(this.constructor.fieldType).map(x => this[x]);
+        `UPDATE ${tableName} SET ${columns.map(x => `${x} = ?`).join(', ')} WHERE id = ?` :
+        `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${columns.map(x => `?`).join(', ')})` ;
+    const values = columns.map(x => this[x]);
 
     const res = ORM.prepare(sql).run(...values);
     this.id = this.id || res.lastInsertRowid;
@@ -62,7 +67,7 @@ class ORM extends Model{
     if(!model.tableName)assignTableName(model);
 
     const key = this.constructor.key;
-    return ORM.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id);
+    return ORM.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id).map(x => Object.assign(new model(), x));
   }
 
   /**
