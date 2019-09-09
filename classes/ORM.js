@@ -49,6 +49,10 @@ class ORM extends Model{
     return this;
   }
 
+  delete(){
+    if(!this.id)throw new Error('ORM delete Error, no id defined');
+    ORM.prepare(`DELETE FROM ${tableName} WHERE id = ?`).run(this.id);
+  }
   /**
    * belongs to - this table have xxx_id column
    * @param fk
