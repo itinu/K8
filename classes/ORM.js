@@ -125,7 +125,7 @@ class ORM extends Model{
    * @param {string} sql
    */
   static prepare(sql){
-    if(!db)throw new Error('ORM Database not assigned. Please provide database with ORM.setDB(db)');
+    if(!ORM.db)throw new Error('ORM Database not assigned. Please provide database with ORM.setDB(db)');
     return ORM.db.prepare(sql);
   }
 }
