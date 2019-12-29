@@ -41,7 +41,7 @@ test('switch package', () => {
         const Foo2 = K8.require('Foo');
         const f2 = new Foo2();
     }catch(e){
-        expect(e.message).toBe('K8 resolve path error: path Foo.js not found');
+        expect(e.message.replace(/ {[^}]+}/, '')).toBe('K8 resolve path error: path Foo.js not found. classes , ');
     }
 });
 
@@ -61,7 +61,7 @@ test('application folder', () => {
         const Foo2 = K8.require('Foo');
         const f2 = new Foo2();
     }catch(e){
-        expect(e.message).toBe('K8 resolve path error: path Foo.js not found');
+        expect(e.message.replace(/ {[^}]+}/, '')).toBe('K8 resolve path error: path Foo.js not found. classes , {} ');
     }
 });
 
@@ -85,7 +85,7 @@ test('path not found', ()=>{
    try{
        K8.require('NotFound');
    }catch(e){
-       expect(e.message).toBe('K8 resolve path error: path NotFound.js not found');
+       expect(e.message.replace(/ {[^}]+}/, '')).toBe('K8 resolve path error: path NotFound.js not found. classes , ');
    }
 });
 
