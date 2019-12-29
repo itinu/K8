@@ -64,8 +64,6 @@ const reloadModuleInit = () => {
 
 class K8 {
   static init(EXE_PATH = null, APP_PATH = null, MOD_PATH = null){
-    K8.VERSION  = '0.1.25';
-
     K8.config = require('./config/site');
 
     K8.nodePackages = [];//register by require('k8mvc-module');
@@ -118,4 +116,5 @@ class K8 {
   }
 }
 
+K8.VERSION  = '0.1.26';
 module.exports = K8;

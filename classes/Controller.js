@@ -45,9 +45,8 @@ class Controller{
 
       if(this[action] === undefined){
         this.notFound(`${ this.constructor.name }::${action} not found`);
-        return this.response;
+        return;
       }
-
 
       if(!this.headerSent)await this.before();
       if(!this.headerSent){
@@ -61,8 +60,6 @@ class Controller{
     }catch(err){
       this.serverError(err);
     }
-
-    return this.response;
   }
 
   /**
