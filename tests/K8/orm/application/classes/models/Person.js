@@ -1,8 +1,8 @@
 const ORM = require('../../../../../../classes/ORM');
 
 class Person extends ORM{
-  constructor(id) {
-    super(id);
+  constructor(id, db) {
+    super(id, db);
 
     if(id)return;
 

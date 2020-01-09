@@ -8,8 +8,10 @@ function assignTableName(model){
 }
 
 class ORM extends Model{
-  constructor(id = null){
+  constructor(id = null, db = null){
     super();
+    this.db = db;
+
     this.id = id;
     this.created_at = null;
     this.updated_at = null;
@@ -25,7 +27,7 @@ class ORM extends Model{
     }
 
     if(id !== null){
-      Object.assign(this, ORM.get(this.constructor, id));
+      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE id = ?`).get(id));
     }
   }
 
@@ -43,7 +45,7 @@ class ORM extends Model{
         `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${columns.map(x => `?`).join(', ')})` ;
     const values = columns.map(x => this[x]);
 
-    const res = ORM.prepare(sql).run(...values);
+    const res = this.prepare(sql).run(...values);
     this.id = this.id || res.lastInsertRowid;
 
     return this;
@@ -51,7 +53,8 @@ class ORM extends Model{
 
   delete(){
     if(!this.id)throw new Error('ORM delete Error, no id defined');
-    ORM.prepare(`DELETE FROM ${tableName} WHERE id = ?`).run(this.id);
+    const tableName = this.constructor.tableName;
+    this.prepare(`DELETE FROM ${tableName} WHERE id = ?`).run(this.id);
   }
   /**
    * belongs to - this table have xxx_id column
@@ -61,7 +64,7 @@ class ORM extends Model{
   belongsTo(fk){
     const modelName = this.constructor.belongsTo.find(x => x.fk === fk).model;
     const model = K8.require(`models/${modelName}`);
-    return ORM.get(model, this[fk]);
+    return new model(this[fk], this.db);
   }
 
   /**
@@ -71,7 +74,7 @@ class ORM extends Model{
     if(!model.tableName)assignTableName(model);
 
     const key = this.constructor.key;
-    return ORM.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id).map(x => Object.assign(new model(), x));
+    return this.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id).map(x => Object.assign(new model(null, this.db), x));
   }
 
   /**
@@ -81,35 +84,9 @@ class ORM extends Model{
   belongsToMany(model){
     const jointTableName = this.constructor.jointTablePrefix + '_' +model.tableName;
 
-    return ORM.prepare(`SELECT * FROM ${jointTableName} WHERE ${this.constructor.key} = ?`)
+    return this.prepare(`SELECT * FROM ${jointTableName} WHERE ${this.constructor.key} = ?`)
         .all(this.id)
-        .map(x => new model(x[model.key]));
-  }
-
-  /**
-   *
-   * @param {Model} model
-   * @returns {Array}
-   */
-  static all(model) {
-    if(!model.tableName)assignTableName(model);
-
-    return ORM.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(), x));
-  }
-
-  /**
-   *
-   * @param {Model} model
-   * @param {Number} id
-   * @returns {Object}
-   */
-  static get(model, id){
-    if(!model.tableName)assignTableName(model);
-
-    return Object.assign(
-        new model(),
-        ORM.prepare(`SELECT * from ${model.tableName} WHERE id = ?`).get(id)
-    );
+        .map(x => new model(x[model.key], this.db));
   }
 
   /**
@@ -122,8 +99,39 @@ class ORM extends Model{
 
   /**
    *
+   * @param {Model} model
+   * @returns {Array}
+   */
+  all(){
+    const model = this.constructor;
+    if(!model.tableName)assignTableName(model);
+    return this.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(null, this.db), x));
+  }
+
+  static all(model) {
+    const m = new model();
+    return m.all();
+  }
+
+  /**
+   *
+   * @param {Model} model
+   * @param {Number} id
+   * @returns {Object}
+   */
+  static get(model, id){
+    return new model(id);
+  }
+
+  /**
+   *
    * @param {string} sql
    */
+  prepare(sql){
+    if(this.db)return this.db.prepare(sql);
+    return ORM.prepare(sql);
+  }
+
   static prepare(sql){
     if(!ORM.db)throw new Error('ORM Database not assigned. Please provide database with ORM.setDB(db)');
     return ORM.db.prepare(sql);

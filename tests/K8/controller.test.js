@@ -1,4 +1,4 @@
-const K8 = require('k8mvc');
+const K8 = require('../../K8');
 
 test('controller init', ()=>{
 

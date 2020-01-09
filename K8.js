@@ -66,8 +66,6 @@ class K8 {
   static init(EXE_PATH = null, APP_PATH = null, MOD_PATH = null){
     K8.config = require('./config/site');
 
-    K8.nodePackages = [];//register by require('k8mvc-module');
-
     K8.classPath  = {}; //{'ORM'          => 'APP_PATH/classes/ORM.js'}
     K8.viewPath   = {}; //{'layout/index' => 'APP_PATH/views/layout/index'}
     K8.configPath = {}; //{'site.js       => 'APP_PATH/config/site.js'}
@@ -83,8 +81,8 @@ class K8 {
     return K8;
   }
 
-
   static addNodeModules(packageFolder){
+    //register by require('k8mvc-module');
     K8.nodePackages.push(packageFolder.replace('/index.js', ''));
   }
 
@@ -116,5 +114,6 @@ class K8 {
   }
 }
 
-K8.VERSION  = '0.1.28';
+K8.VERSION  = '0.1.32';
+K8.nodePackages = [];
 module.exports = K8;
