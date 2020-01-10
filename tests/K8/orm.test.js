@@ -70,9 +70,6 @@ describe('orm test', ()=>{
         if(fs.existsSync(dbPath))fs.unlinkSync(dbPath);
         const db = new Database(dbPath);
 
-        const ORM = require('../../classes/ORM');
-        ORM.setDB(db);
-
         const tableName = 'testmodels';
         db.prepare(`CREATE TABLE ${tableName}( id INTEGER UNIQUE PRIMARY KEY AUTOINCREMENT NOT NULL , created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL , updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL , text TEXT NOT NULL)`).run();
         db.prepare(`CREATE TRIGGER ${tableName}_updated_at AFTER UPDATE ON ${tableName} WHEN old.updated_at < CURRENT_TIMESTAMP BEGIN UPDATE ${tableName} SET updated_at = CURRENT_TIMESTAMP WHERE id = old.id; END;`).run();
@@ -81,8 +78,8 @@ describe('orm test', ()=>{
 
         const TestModel = require('./orm/application/classes/TestModel');
 
-        const m = new TestModel(1, db);
-        const m2 = new TestModel(2, db);
+        const m = new TestModel(1, {database: db});
+        const m2 = new TestModel(2,{database: db});
 
         expect(TestModel.tableName).toBe('testmodels');
 
@@ -138,10 +135,10 @@ describe('orm test', ()=>{
         const Address = K8.require('models/Address');
         const Person = K8.require('models/Person');
 
-        const peter = new Person(1, db);
+        const peter = new Person(1, {database: db} );
         expect(peter.first_name).toBe('Peter');
 
-        const home = new Address(1, db);
+        const home = new Address(1, {database: db} );
         expect(home.address1).toBe('Planet X');
 
         const owner = home.belongsTo('person_id');
@@ -192,7 +189,7 @@ describe('orm test', ()=>{
         const Product = K8.require('models/Product');
         const Tag     = K8.require('models/Tag');
 
-        const product = new Product(1, db);
+        const product = new Product(1, {database: db} );
 
         expect(product.name).toBe('bar');
         const tags = product.belongsToMany(Tag);
@@ -233,7 +230,7 @@ describe('orm test', ()=>{
         db.prepare('INSERT INTO tags (name) VALUES (?)').run('tar');
 
         const Tag = K8.require('models/Tag');
-        const t = new Tag(null, db);
+        const t = new Tag(null, {database: db} );
         const tags = t.all();
 
         expect(tags[0].name).toBe('foo');

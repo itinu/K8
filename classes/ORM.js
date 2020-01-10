@@ -8,11 +8,12 @@ function assignTableName(model){
 }
 
 class ORM extends Model{
-  constructor(id = null, db = null){
+  constructor(id = null, options = {}){
     super();
-    this.db = db;
+    this.db = options.database;
 
     this.id = id;
+    this.uid = null;
     this.created_at = null;
     this.updated_at = null;
 
@@ -27,7 +28,7 @@ class ORM extends Model{
     }
 
     if(id !== null){
-      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE id = ?`).get(id));
+      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE ${options.isUid? 'uid' : 'id'} = ?`).get(id));
     }
   }
 
@@ -64,7 +65,7 @@ class ORM extends Model{
   belongsTo(fk){
     const modelName = this.constructor.belongsTo.find(x => x.fk === fk).model;
     const model = K8.require(`models/${modelName}`);
-    return new model(this[fk], this.db);
+    return new model(this[fk], {database: this.db});
   }
 
   /**
@@ -74,7 +75,7 @@ class ORM extends Model{
     if(!model.tableName)assignTableName(model);
 
     const key = this.constructor.key;
-    return this.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id).map(x => Object.assign(new model(null, this.db), x));
+    return this.prepare(`SELECT * FROM ${model.tableName} WHERE ${key} = ?`).all(this.id).map(x => Object.assign(new model(null, {database : this.db}), x));
   }
 
   /**
@@ -86,7 +87,7 @@ class ORM extends Model{
 
     return this.prepare(`SELECT * FROM ${jointTableName} WHERE ${this.constructor.key} = ?`)
         .all(this.id)
-        .map(x => new model(x[model.key], this.db));
+        .map(x => new model(x[model.key], {database : this.db}));
   }
 
   /**
@@ -105,7 +106,7 @@ class ORM extends Model{
   all(){
     const model = this.constructor;
     if(!model.tableName)assignTableName(model);
-    return this.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(null, this.db), x));
+    return this.prepare(`SELECT * from ${model.tableName}`).all().map(x => Object.assign(new model(null, {database: this.db}), x));
   }
 
   static all(model) {
