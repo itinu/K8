@@ -8,12 +8,12 @@ function assignTableName(model){
 }
 
 class ORM extends Model{
-  constructor(id = null, options = {}){
+  constructor(key = null, options = {}){
     super();
     this.db = options.database;
 
-    this.id = id;
-    this.uid = null;
+    this.id = options.isUid  ? null : key;
+    this.uid = options.isUid ? key  : null;
     this.created_at = null;
     this.updated_at = null;
 
@@ -27,8 +27,8 @@ class ORM extends Model{
       }
     }
 
-    if(id !== null){
-      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE ${options.isUid? 'uid' : 'id'} = ?`).get(id));
+    if(key !== null){
+      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE ${options.isUid? 'uid' : 'id'} = ?`).get(key));
     }
   }
 
