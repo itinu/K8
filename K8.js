@@ -114,6 +114,6 @@ class K8 {
   }
 }
 
-K8.VERSION  = '0.1.37';
+K8.VERSION  = '0.1.38';
 K8.nodePackages = [];
 module.exports = K8;

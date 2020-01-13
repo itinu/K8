@@ -40,14 +40,18 @@ class ORM extends Model{
     //add belongsTo to columns
     this.constructor.belongsTo.forEach(x => columns.push(x.fk));
 
-    const sql = (this.id) ?
-        `UPDATE ${tableName} SET ${columns.map(x => `${x} = ?`).join(', ')} WHERE id = ?` :
-        `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${columns.map(x => `?`).join(', ')})` ;
     const values = columns.map(x => this[x]);
 
-    const res = this.prepare(sql).run(...values);
-    this.id = this.id || res.lastInsertRowid;
+    let sql = '';
+    if(this.id){
+      sql = `UPDATE ${tableName} SET ${columns.map(x => `${x} = ?`).join(', ')} WHERE id = ?`;
+    }else{
+      this.id = (Math.floor(Date.now()-1563741060000)/1000)*100000 + Math.floor(Math.random()*100000);
+      sql = `INSERT INTO ${tableName} (${columns.join(', ')}, id) VALUES (?, ${columns.map(x => `?`).join(', ')})`;
+    }
 
+    values.push(this.id);
+    this.prepare(sql).run(...values);
     return this;
   }
 
