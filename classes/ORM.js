@@ -12,8 +12,7 @@ class ORM extends Model{
     super();
     this.db = options.database;
 
-    this.id = options.isUid  ? null : key;
-    this.uid = options.isUid ? key  : null;
+    this.id = key;
     this.created_at = null;
     this.updated_at = null;
 
@@ -28,7 +27,7 @@ class ORM extends Model{
     }
 
     if(key !== null){
-      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE ${options.isUid? 'uid' : 'id'} = ?`).get(key));
+      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE id = ?`).get(key));
     }
   }
 
@@ -85,9 +84,8 @@ class ORM extends Model{
   belongsToMany(model){
     const jointTableName = this.constructor.jointTablePrefix + '_' +model.tableName;
 
-    return this.prepare(`SELECT * FROM ${jointTableName} WHERE ${this.constructor.key} = ?`)
-        .all(this.id)
-        .map(x => new model(x[model.key], {database : this.db}));
+    const sql = `SELECT ${model.tableName}.* FROM ${model.tableName} JOIN ${jointTableName} ON ${model.tableName}.id = ${jointTableName}.${model.key} WHERE ${jointTableName}.${this.constructor.key} = ? ORDER BY ${jointTableName}.weight`;
+    return this.prepare(sql).all(this.id).map(x => Object.assign(new model(null, {database : this.db}), x));
   }
 
   /**
