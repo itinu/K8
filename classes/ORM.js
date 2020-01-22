@@ -8,11 +8,11 @@ function assignTableName(model){
 }
 
 class ORM extends Model{
-  constructor(key = null, options = {}){
+  constructor(id = null, options = {}){
     super();
     this.db = options.database;
 
-    this.id = key;
+    this.id = id;
     this.created_at = null;
     this.updated_at = null;
 
@@ -26,9 +26,14 @@ class ORM extends Model{
       }
     }
 
-    if(key !== null){
-      Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE id = ?`).get(key));
-    }
+    if( options.lazyload || !this.id )return;
+    this.load();
+  }
+
+  load(){
+    if(!this.id)return;
+
+    Object.assign(this, this.prepare(`SELECT * from ${this.constructor.tableName} WHERE id = ?`).get(this.id));
   }
 
   /**
@@ -52,13 +57,46 @@ class ORM extends Model{
 
     values.push(this.id);
     this.prepare(sql).run(...values);
+
     return this;
+  }
+
+  add(model, weight = null){
+    const Model = model.constructor;
+
+    const jointTableName = `${this.constructor.jointTablePrefix}_${Model.tableName}`;
+    const lk = this.constructor.key;
+    const fk = Model.key;
+
+    const record = this.prepare(`SELECT * FROM ${jointTableName} WHERE ${lk} = ? AND ${fk} = ?`).get(this.id, model.id);
+    if(record){
+      throw new Error(`${Model.tableName}(${model.id}) already linked to ${this.constructor.tableName}(${this.id})`);
+    };
+
+    this.prepare(`INSERT INTO ${jointTableName} (${lk}, ${fk}, weight) VALUES (?, ?, ?)`).run(this.id, model.id, weight);
+  }
+
+  remove(model){
+    const Model = model.constructor;
+    const jointTableName = `${this.constructor.jointTablePrefix}_${Model.tableName}`;
+    const lk = this.constructor.key;
+    const fk = Model.key;
+
+    this.prepare(`DELETE FROM ${jointTableName} WHERE ${lk} = ? AND ${fk} = ?`).run(this.id, model.id);
   }
 
   delete(){
     if(!this.id)throw new Error('ORM delete Error, no id defined');
     const tableName = this.constructor.tableName;
     this.prepare(`DELETE FROM ${tableName} WHERE id = ?`).run(this.id);
+
+    //remove many to many
+    this.constructor.belongsToMany.forEach(x => {
+      const model = K8.require(`models/${x}`);
+      const lk = this.constructor.key;
+      const table = `${this.constructor.jointTablePrefix}_${model.tableName}`;
+      this.prepare(`DELETE FROM ${table} WHERE ${lk} = ?`).run(this.id);
+    });
   }
   /**
    * belongs to - this table have xxx_id column
