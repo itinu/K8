@@ -10,7 +10,11 @@ function assignTableName(model){
 class ORM extends Model{
   constructor(id = null, options = {}){
     super();
-    this.db = options.database;
+    //private property this.db.
+    Object.defineProperty(this, "db", {
+      enumerable : false,
+      value : options.database
+    });
 
     this.id = id;
     this.created_at = null;
@@ -111,6 +115,7 @@ class ORM extends Model{
 
   /**
    * has many
+   * @param {ORM} model
    */
   hasMany(model){
     if(!model.tableName)assignTableName(model);
@@ -121,7 +126,7 @@ class ORM extends Model{
 
   /**
    *
-   * @param {Model} model
+   * @param {ORM} model
    */
   belongsToMany(model){
     const jointTableName = this.constructor.jointTablePrefix + '_' +model.tableName;

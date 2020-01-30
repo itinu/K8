@@ -236,4 +236,21 @@ describe('orm test', ()=>{
         expect(tags[0].name).toBe('foo');
         expect(tags[1].name).toBe('tar');
     });
+
+    test('enumerate', ()=>{
+      const dbPath = __dirname+'/orm/db/belongsToMany.sqlite';
+      if(fs.existsSync(dbPath))fs.unlinkSync(dbPath);
+      fs.copyFileSync(__dirname+'/orm/db/belongsToMany.default.sqlite', dbPath);
+      const db = new Database(dbPath);
+
+      db.prepare('INSERT INTO tags (id, name) VALUES (?, ?)').run(1, 'foo');
+      db.prepare('INSERT INTO tags (id, name) VALUES (?, ?)').run(2, 'tar');
+
+      const Tag = K8.require('models/Tag');
+      const t = new Tag(1, {database: db});
+
+      console.log(t);
+
+      expect(t.name).toBe('foo');
+    });
 });
