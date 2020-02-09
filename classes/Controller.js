@@ -1,3 +1,5 @@
+const K8 = require('../K8');
+
 class Controller{
   /**
    *
@@ -40,6 +42,7 @@ class Controller{
 
   async execute(){
     try{
+      K8.validateCache();
       //guard check function action_* exist
       const action = `action_${this.request.params.action || 'index'}`;
 

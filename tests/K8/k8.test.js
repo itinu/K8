@@ -115,13 +115,13 @@ describe('k8 test', ()=>{
         expect(Foo2.id).toBe(1);
 
         K8.config.cache.exports = true;
-        K8.clearCache();
+        K8.validateCache();
 
         const Foo3 = K8.require('Foo');
         expect(Foo3.id).toBe(1);
 
         K8.config.cache.exports = false;
-        K8.clearCache();
+        K8.validateCache();
         //jest override require, need to use reset modules to invalidate
         jest.resetModules();
 
@@ -133,5 +133,30 @@ describe('k8 test', ()=>{
         K8.init(`${__dirname}/test7`);
         const viewFile = K8.resolveView('test.html');
         expect(viewFile).toBe(`${__dirname}/test7/application/views/test.html`);
+    });
+
+    test('config path', ()=>{
+        const fs = require('fs');
+        const EXE_PATH = `${__dirname}/test8`;
+        const APP_PATH = EXE_PATH + '/application';
+        K8.init(EXE_PATH);
+        expect(K8.config.salt).toBe('theencryptsaltatleast32character');
+
+
+        fs.copyFileSync(APP_PATH+'/config/site.default.js', APP_PATH+'/config/site.js');
+        K8.validateCache();
+        expect(K8.config.salt).toBe('default salt 1');
+
+        fs.unlinkSync(APP_PATH+'/config/site.js');
+        K8.validateCache();
+        expect(K8.config.salt).toBe('theencryptsaltatleast32character');
+
+        fs.copyFileSync(APP_PATH+'/config/site.default2.js', APP_PATH+'/config/site.js');
+        jest.resetModules();
+        K8.validateCache();
+        expect(K8.config.salt).toBe('default salt 2');
+
+        //clean up
+        fs.unlinkSync(APP_PATH+'/config/site.js');
     });
 });

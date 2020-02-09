@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-//private resolve
+//private methods
 const resolve = (pathToFile, prefixPath, store)=>{
   if(!store[pathToFile]){
     //search application, then modules, then system
@@ -38,7 +38,23 @@ const setPath = (EXE_PATH = null, APP_PATH = null, MOD_PATH = null) => {
 };
 
 const updateConfig = () => {
-  K8.config = require(resolve('site.js', 'config', K8.configPath));
+  K8.configPath['site.js'] = null; // never cache site config file.
+  const file = resolve('site.js', 'config', K8.configPath);
+
+  K8.config = require(file);
+  delete require.cache[file];
+};
+
+const clearRequireCache = ()=>{
+  for(let name in K8.classPath){
+    delete require.cache[K8.classPath[name]];
+  }
+  K8.classPath = {};
+  K8.configPath = {};
+};
+
+const clearViewCache = ()=>{
+  K8.viewPath = {};
 };
 
 const reloadModuleInit = () => {
@@ -86,19 +102,14 @@ class K8 {
     K8.nodePackages.push(packageFolder.replace('/index.js', ''));
   }
 
-  static clearCache(){
+  static validateCache(){
     updateConfig();
-
     if(K8.config.cache.exports === false){
-      for(let name in K8.classPath){
-        delete require.cache[K8.classPath[name]];
-      }
-      K8.classPath = {};
-      K8.configPath = {};
+      clearRequireCache();
     }
 
     if(!K8.config.cache.view === false){
-      K8.viewPath = {};
+      clearViewCache();
     }
 
     reloadModuleInit();
@@ -114,6 +125,6 @@ class K8 {
   }
 }
 
-K8.VERSION  = '0.1.44';
+K8.VERSION  = '0.1.50';
 K8.nodePackages = [];
 module.exports = K8;
